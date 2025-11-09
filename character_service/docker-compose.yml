@@ -1,0 +1,41 @@
+services:
+  character_db:
+    image: postgres:latest
+    container_name: dnd_tracker_character_db
+    environment:
+      POSTGRES_USER: ${CHARACTER_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${CHARACTER_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${CHARACTER_POSTGRES_DB}
+    env_file:
+      - .env
+    ports:
+      - "35433:5432"
+    volumes:
+      - dnd_tracker_character_db:/var/lib/postgresql
+    command: [ "postgres", "-c", "log_statement=all" ]
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CHARACTER_POSTGRES_USER} || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  character_service:
+    build: .
+    container_name: dnd_tracker_character_service
+    volumes:
+      - .:/app
+    ports:
+      - "8002:8002"
+    depends_on:
+      character_db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+volumes:
+  dnd_tracker_character_db:
