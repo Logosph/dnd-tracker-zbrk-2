@@ -1,8 +1,10 @@
-name: Multi-Service Checks
+name: Multi-Service Checks and dice service deployment
 
 on:
+  push:
+    branches: ["master"]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: ["master"]
 
 jobs:
   lint:
@@ -41,4 +43,24 @@ jobs:
 
       - name: Run make ${{ matrix.service }}-check
         run: make ${{ matrix.service }}-check
+
+  push-to-yandexcloud:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build docker image
+        working-directory: dice_service
+        run: |
+          docker build . --file Dockerfile --tag cr.yandex/${{secrets.YC_REGISTRY_ID }}/delivery-service:latest
+
+      - name: Login to YC Registry
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: cr.yandex
+          username: json_key
+          password: ${{ secrets.YC_KEYS }}
+
+      - name: Push tag to YC Registry
+        working-directory: ./dice_service
+        run: |
+          docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
 
