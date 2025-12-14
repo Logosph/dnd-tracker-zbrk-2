@@ -45,7 +45,6 @@ jobs:
         run: make ${{ matrix.service }}-check
 
   push-to-yandexcloud:
-    needs: build-container
     runs-on: ubuntu-latest
     steps:
       - name: Build docker image
