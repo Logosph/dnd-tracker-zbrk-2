@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build docker image
-        working-directory: ./dice_service
+        working-directory: dice_service
         run: |
           docker build . --file Dockerfile --tag cr.yandex/${{secrets.YC_REGISTRY_ID }}/delivery-service:latest
           
