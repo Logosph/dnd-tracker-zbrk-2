@@ -1,8 +1,10 @@
 name: Multi-Service Checks and dice service deployment
 
 on:
+  push:
+    branches: [master]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ master ]
 
 jobs:
   lint:
