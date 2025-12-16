@@ -46,7 +46,10 @@ jobs:
 
   push-to-yandexcloud:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Build docker image
         working-directory: dice_service
         run: |
@@ -59,10 +62,7 @@ jobs:
           username: json_key 
           password: ${{ secrets.YC_KEYS }} 
 
-      - name: Push container to YandexCloud
-        working-directory: pingService
-        run: | 
-          docker load --input ping-service.tar
-          docker tag ping-service:latest cr.yandex/${{ secrets.YC_REGISTRY_ID }}/ping-service:latest
-          docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/ping-service:latest
+      - name: Push tag to YC Registry
+        run: |
+          docker push cr.yandex/${{ secrets.YC_REGISTRY_ID }}/delivery-service:latest
 
