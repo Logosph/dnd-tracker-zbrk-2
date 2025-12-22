@@ -1,10 +1,12 @@
+import logging
+
 from fastapi import FastAPI
+from prometheus_client import Counter, Histogram, generate_latest
 from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import Response
 
 from app.config.settings import settings
 from dice_service.app.routers.dice_routes import router
-
-import logging
 
 # Настройка логгера
 logging.basicConfig(
@@ -12,6 +14,9 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+REQUESTS = Counter("requests_total", "All requests")
+LATENCY = Histogram("request_latency_seconds", "Request latency")
 
 app = FastAPI(
     title="Dice Service",
@@ -46,3 +51,7 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "dice"}
+
+@app.get("/metrics")
+def metrics():
+    return Response(generate_latest(), media_type="text/plain")
